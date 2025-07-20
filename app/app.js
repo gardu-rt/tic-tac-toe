@@ -1,9 +1,11 @@
+// App
+
 const gameboard = function () {
-  const CELL = 9;
+  const LENGTH = 9;
   let board = ["", "", "", "", "", "", "", "", ""];
 
-  function makeMove(player, cell) {
-    board[cell] = player;
+  function makeMove(player, index) {
+    board[index] = player;
   }
 
   function getBoard() {
@@ -12,7 +14,7 @@ const gameboard = function () {
 
   function clearBoard() {
     board = [];
-    for (let i = 0; i < CELL; i++) {
+    for (let i = 0; i < LENGTH; i++) {
       board.push("");
     }
   }
@@ -32,14 +34,14 @@ const gameboard = function () {
 const gamecontrol = function () {
   const board = gameboard();
 
-  let currentPlayer = "X";
+  let currentPlayer = "✕";
 
   function switchPlayer() {
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    currentPlayer = currentPlayer === "✕" ? "◯" : "✕";
   }
 
-  function isValidMove(cell) {
-    return !board.getBoard()[cell] ? true : false;
+  function isValidMove(index) {
+    return !board.getBoard()[index] ? true : false;
   }
 
   function checkWinner() {
@@ -65,9 +67,9 @@ const gamecontrol = function () {
   }
 
   function checkDraw() {
-    for (cell of board.getBoard()) {
+    for (item of board.getBoard()) {
 
-      if (cell === "") return false;
+      if (item === "") return false;
 
     }
 
@@ -95,15 +97,15 @@ const gamecontrol = function () {
     board.printBoard();
   }
 
-  function playRound(cell) {
+  function playRound(index) {
     if (gameOver) return;
 
-    if (!isValidMove(cell)) {
+    if (!isValidMove(index)) {
       console.log("invalid move try again");
       return;
     }
 
-    board.makeMove(currentPlayer, cell);
+    board.makeMove(currentPlayer, index);
     board.printBoard();
     gameResult();
 
@@ -112,8 +114,39 @@ const gamecontrol = function () {
     switchPlayer();
   }
 
-  return { playRound, resetGame };
+  return { playRound, resetGame, board: board.getBoard() };
 
 };
 
 const game = gamecontrol();
+// DOM
+
+const container = document.querySelector(".grid-container");
+
+for (item of game.board) {
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  container.appendChild(cell);
+}
+
+const cells = document.querySelectorAll(".cell");
+
+function updateDisplay() {
+  cells.forEach((cell, index) => {
+    cell.textContent = game.board[index];
+    if (cell.textContent === "✕") {
+      cell.style.color = "green";
+    } else {
+      cell.style.color = "red";
+    }
+  });
+}
+
+updateDisplay();
+
+cells.forEach((cell, index) => {
+  cell.addEventListener("click", function () {
+    game.playRound(index);
+    updateDisplay();
+  });
+});
